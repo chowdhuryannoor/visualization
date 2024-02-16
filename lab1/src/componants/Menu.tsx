@@ -4,9 +4,12 @@ import { attribute, chart } from "../utils/attribute";
 interface MenuProps {
     graphType: attribute;
     setAttribute: (graphType: attribute) => void;
+    handleFlip: () => void;
 }
 
-function Menu({ graphType, setAttribute }: MenuProps) {
+function Menu({ graphType, setAttribute, handleFlip}: MenuProps) {
+    const [scatterPlotDropdown, setScatterPlotDropdown] = useState()
+
     const menuItems = [
         { type: chart.barchart, x: "categorial1" },
         { type: chart.barchart, x: "categorial2" },
@@ -32,13 +35,11 @@ function Menu({ graphType, setAttribute }: MenuProps) {
             x: graphType.x,
             y: menuItems[parseInt(event.target.value)].x,
         });
+
+        setScatterPlotDropdown(parseInt(event.target.value))
     };
 
-    function handleFlip(event: MouseEventHandler<HTMLButtonElement>): void {
-        throw new Error("Function not implemented.");
-    }
-
-    function handleClear(event: MouseEventHandler<HTMLButtonElement>): void {
+    function handleClear(event: React.MouseEvent<HTMLButtonElement>): void {
         throw new Error("Function not implemented.");
     }
 
@@ -48,10 +49,10 @@ function Menu({ graphType, setAttribute }: MenuProps) {
                 <label htmlFor='var1_dropdown'>Select 1st Attribute</label>
                 <select
                     id='var1_dropdown'
-                    defaultValue={"DEFAULT"}
+                    defaultValue={-1}
                     onChange={handleSelectVar1}
                 >
-                    <option value='DEFAULT' disabled>
+                    <option value={-1} disabled>
                         -- Please select --
                     </option>
                     {menuItems.map((menuItem, i) => {
@@ -76,11 +77,11 @@ function Menu({ graphType, setAttribute }: MenuProps) {
                 <label htmlFor='var2_dropdown'>Select 2nd Attribute</label>
                 <select
                     id='var2_dropdown'
-                    defaultValue={"DEFAULT"}
+                    value={scatterPlotDropdown}
                     disabled={graphType.type == chart.none}
                     onChange={handleSelectVar2}
                 >
-                    <option value='DEFAULT' disabled>
+                    <option value={-1} disabled>
                         -- Please select --
                     </option>
                     {menuItems.map((menuItem, i) => {
