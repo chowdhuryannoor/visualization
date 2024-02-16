@@ -7,10 +7,11 @@ interface MenuProps {
     handleFlip: () => void;
 }
 
-function Menu({ graphType, setAttribute, handleFlip}: MenuProps) {
-    const [scatterPlotDropdown, setScatterPlotDropdown] = useState()
+function Menu({ graphType, setAttribute, handleFlip }: MenuProps) {
+    const [var1, setVar1] = useState<number>(-1);
+    const [var2, setVar2] = useState<number>(-1);
 
-    const menuItems = [
+    const menuItems: attribute[] = [
         { type: chart.barchart, x: "categorial1" },
         { type: chart.barchart, x: "categorial2" },
         { type: chart.barchart, x: "categorial3" },
@@ -21,9 +22,11 @@ function Menu({ graphType, setAttribute, handleFlip}: MenuProps) {
         { type: chart.histogram, x: "numeric4" },
     ];
 
+    //Event Handlers
     const handleSelectVar1 = (
         event: React.ChangeEvent<HTMLSelectElement>
     ): void => {
+        setVar1(parseInt(event.target.value));
         setAttribute(menuItems[parseInt(event.target.value)]);
     };
 
@@ -36,12 +39,30 @@ function Menu({ graphType, setAttribute, handleFlip}: MenuProps) {
             y: menuItems[parseInt(event.target.value)].x,
         });
 
-        setScatterPlotDropdown(parseInt(event.target.value))
+        setVar2(parseInt(event.target.value));
     };
 
-    function handleClear(event: React.MouseEvent<HTMLButtonElement>): void {
-        throw new Error("Function not implemented.");
+    function handleClear(): void {
+        setAttribute(menuItems[var1]);
+        setVar2(-1);
     }
+
+    const handleRadioButton = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ): void => {
+        if (parseInt(event.target.value))
+            setAttribute({
+                type: chart.scatterplot,
+                x: menuItems[var2].x,
+                y: menuItems[var1].x,
+            });
+        else
+            setAttribute({
+                type: chart.scatterplot,
+                x: menuItems[var1].x,
+                y: menuItems[var2].x,
+            });
+    };
 
     return (
         <>
@@ -49,7 +70,7 @@ function Menu({ graphType, setAttribute, handleFlip}: MenuProps) {
                 <label htmlFor='var1_dropdown'>Select 1st Attribute</label>
                 <select
                     id='var1_dropdown'
-                    defaultValue={-1}
+                    defaultValue={var1}
                     onChange={handleSelectVar1}
                 >
                     <option value={-1} disabled>
@@ -77,7 +98,7 @@ function Menu({ graphType, setAttribute, handleFlip}: MenuProps) {
                 <label htmlFor='var2_dropdown'>Select 2nd Attribute</label>
                 <select
                     id='var2_dropdown'
-                    value={scatterPlotDropdown}
+                    value={var2}
                     disabled={graphType.type == chart.none}
                     onChange={handleSelectVar2}
                 >
@@ -98,6 +119,36 @@ function Menu({ graphType, setAttribute, handleFlip}: MenuProps) {
                 >
                     Clear
                 </button>
+            </div>
+            <div className='menu_item'>
+                <label>Select Scatterplot Axis</label>
+                <div className='radio_button'>
+                    <input
+                        id='xy'
+                        type='radio'
+                        name='choose_axis'
+                        value={0}
+                        onChange={handleRadioButton}
+                        disabled={graphType.type != chart.scatterplot}
+                    />
+                    <label htmlFor='xy'>(x, y)</label>
+                </div>
+                <div className='radio_button'>
+                    <input
+                        id='yx'
+                        type='radio'
+                        name='choose_axis'
+                        value={1}
+                        // checked={
+                        //     var1 != -1 &&
+                        //     var2 != -1 &&
+                        //     graphType.y == menuItems[var1].x &&
+                        //     graphType.x == menuItems[var1].x
+                        // }
+                        onChange={handleRadioButton}
+                    />
+                    <label htmlFor='yx'>(y, x)</label>
+                </div>
             </div>
         </>
     );
