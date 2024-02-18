@@ -1,4 +1,4 @@
-import { MouseEventHandler, useState } from "react";
+import { MouseEventHandler, useEffect, useState } from "react";
 import { attribute, chart } from "../utils/attribute";
 
 interface MenuProps {
@@ -7,19 +7,33 @@ interface MenuProps {
     handleFlip: () => void;
 }
 
-function Menu({ graphType, setAttribute, handleFlip }: MenuProps) {
+export default function Menu({
+    graphType,
+    setAttribute,
+    handleFlip,
+}: MenuProps) {
     const [var1, setVar1] = useState<number>(-1);
     const [var2, setVar2] = useState<number>(-1);
 
     const menuItems: attribute[] = [
-        { type: chart.barchart, x: "categorial1" },
-        { type: chart.barchart, x: "categorial2" },
-        { type: chart.barchart, x: "categorial3" },
-        { type: chart.barchart, x: "categorial4" },
-        { type: chart.histogram, x: "numeric1" },
-        { type: chart.histogram, x: "numeric2" },
-        { type: chart.histogram, x: "numeric3" },
-        { type: chart.histogram, x: "numeric4" },
+        { type: chart.barchart, x: "Body_Type" },
+        { type: chart.barchart, x: "Diet" },
+        { type: chart.barchart, x: "Energy_efficiency" },
+        { type: chart.barchart, x: "Frequency_of_Traveling_by_Air" },
+        { type: chart.barchart, x: "Heating_Energy_Source" },
+        { type: chart.barchart, x: "How_Often_Shower" },
+        { type: chart.barchart, x: "Sex" },
+        { type: chart.barchart, x: "Social_Activity" },
+        { type: chart.barchart, x: "Transport" },
+        { type: chart.barchart, x: "Vehicle_Type" },
+        { type: chart.barchart, x: "Waste_Bag_Size" },
+        { type: chart.histogram, x: "CarbonEmission" },
+        { type: chart.histogram, x: "How_Long_Internet_Daily_Hour" },
+        { type: chart.histogram, x: "How_Long_TV_PC_Daily_Hour" },
+        { type: chart.histogram, x: "How_Many_New_Clothes_Monthly" },
+        { type: chart.histogram, x: "Monthly_Grocery_Bill" },
+        { type: chart.histogram, x: "Vehicle_Monthly_Distance_Km" },
+        { type: chart.histogram, x: "Waste_Bag_Weekly_Count" },
     ];
 
     //Event Handlers
@@ -27,6 +41,7 @@ function Menu({ graphType, setAttribute, handleFlip }: MenuProps) {
         event: React.ChangeEvent<HTMLSelectElement>
     ): void => {
         setVar1(parseInt(event.target.value));
+        setVar2(-1);
         setAttribute(menuItems[parseInt(event.target.value)]);
     };
 
@@ -35,8 +50,9 @@ function Menu({ graphType, setAttribute, handleFlip }: MenuProps) {
     ): void => {
         setAttribute({
             type: chart.scatterplot,
-            x: graphType.x,
-            y: menuItems[parseInt(event.target.value)].x,
+            x: "",
+            scat_x: menuItems[var1],
+            scat_y: menuItems[parseInt(event.target.value)],
         });
 
         setVar2(parseInt(event.target.value));
@@ -50,18 +66,21 @@ function Menu({ graphType, setAttribute, handleFlip }: MenuProps) {
     const handleRadioButton = (
         event: React.ChangeEvent<HTMLInputElement>
     ): void => {
-        if (parseInt(event.target.value))
+        if (parseInt(event.target.value)) {
             setAttribute({
                 type: chart.scatterplot,
-                x: menuItems[var2].x,
-                y: menuItems[var1].x,
+                x: "",
+                scat_x: menuItems[var2],
+                scat_y: menuItems[var1],
             });
-        else
+        } else {
             setAttribute({
                 type: chart.scatterplot,
-                x: menuItems[var1].x,
-                y: menuItems[var2].x,
+                x: "",
+                scat_x: menuItems[var1],
+                scat_y: menuItems[var2],
             });
+        }
     };
 
     return (
@@ -79,7 +98,7 @@ function Menu({ graphType, setAttribute, handleFlip }: MenuProps) {
                     {menuItems.map((menuItem, i) => {
                         return (
                             <option key={i} value={i}>
-                                {menuItem.x}
+                                {menuItem.x.replace(/_/g, " ")}
                             </option>
                         );
                     })}
@@ -108,7 +127,7 @@ function Menu({ graphType, setAttribute, handleFlip }: MenuProps) {
                     {menuItems.map((menuItem, i) => {
                         return (
                             <option key={i} value={i}>
-                                {menuItem.x}
+                                {menuItem.x.replace(/_/g, " ")}
                             </option>
                         );
                     })}
@@ -139,13 +158,8 @@ function Menu({ graphType, setAttribute, handleFlip }: MenuProps) {
                         type='radio'
                         name='choose_axis'
                         value={1}
-                        // checked={
-                        //     var1 != -1 &&
-                        //     var2 != -1 &&
-                        //     graphType.y == menuItems[var1].x &&
-                        //     graphType.x == menuItems[var1].x
-                        // }
                         onChange={handleRadioButton}
+                        disabled={graphType.type != chart.scatterplot}
                     />
                     <label htmlFor='yx'>(y, x)</label>
                 </div>
@@ -153,5 +167,3 @@ function Menu({ graphType, setAttribute, handleFlip }: MenuProps) {
         </>
     );
 }
-
-export default Menu;

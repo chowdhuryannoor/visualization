@@ -21,6 +21,10 @@ body {
 
 #container_title {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 #container_content {
@@ -32,6 +36,9 @@ body {
 
 #container_graph {
     flex: 4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #container_menu {
