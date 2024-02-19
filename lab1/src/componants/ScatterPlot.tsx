@@ -20,28 +20,87 @@ export default function ScatterPlot({
     let ref = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
-        //function for finding the min and max values
-        const xField = scat_x.x;
-        const yField = scat_y.x;
-        const xValue = (d: any) => parseInt(d[xField]);
-        const yValue = (d: any) => parseInt(d[yField]);
-
         const margin = { top: 50, right: 50, bottom: 50, left: 70 };
         const XRange = [margin.left, width - margin.right];
         const YRange = [height - margin.bottom, margin.top];
 
-        const XScale = d3
-            .scaleLinear()
-            .domain([d3.min(data, xValue) ?? 0, d3.max(data, xValue) ?? 0])
-            .range(XRange);
+        //function for finding the min and max values
+        const xField = scat_x.x;
+        const yField = scat_y.x;
 
-        const YScale = d3
-            .scaleLinear()
-            .domain([d3.min(data, yValue) ?? 0, d3.max(data, yValue) ?? 0])
-            .range(YRange);
+        //determine the xScaling
+        let XScale: any;
+        let getCircleX;
+        if (scat_x.type == chart.histogram) {
+            XScale = d3
+                .scaleLinear()
+                .domain([
+                    d3.min(data, (d: any) => parseInt(d[xField])) ?? 0,
+                    d3.max(data, (d: any) => parseInt(d[xField])) ?? 0,
+                ])
+                .range(XRange);
+            getCircleX = (d: any) => XScale(parseInt(d[xField]));
+        } else {
+            XScale = d3
+                .scaleBand(
+                    d3.map(data, (d) => d[xField]),
+                    XRange
+                )
+                .padding(0.1);
+            getCircleX = (d: any) => XScale.bandwidth() / 2 + XScale(d[xField]);
+        }
 
-        const XAxis = d3.axisBottom(XScale);
-        const YAxis = d3.axisLeft(YScale);
+        //determine the y scaling
+        let YScale: any;
+        let getCircleY;
+        if (scat_y.type == chart.histogram) {
+            YScale = d3
+                .scaleLinear()
+                .domain([
+                    d3.min(data, (d: any) => parseInt(d[yField])) ?? 0,
+                    d3.max(data, (d: any) => parseInt(d[yField])) ?? 0,
+                ])
+                .range(YRange);
+
+            getCircleY = (d: any) => YScale(parseInt(d[yField]));
+        } else {
+            YScale = d3
+                .scaleBand(
+                    d3.map(data, (d) => d[yField]),
+                    YRange
+                )
+                .padding(0.1);
+
+            getCircleY = (d: any) => YScale.bandwidth() / 2 + YScale(d[yField]);
+        }
+
+        let radius: any = (d: any) => 1.5;
+        if (scat_x.type == chart.barchart && scat_y.type == chart.barchart) {
+            const counts: { [key: string]: number } = {};
+            data.forEach(
+                (d) =>
+                    (counts[`(${getCircleX(d)},${getCircleY(d)})`] =
+                        (counts[`(${getCircleX(d)},${getCircleY(d)})`] || 0) +
+                        1)
+            );
+            let max = 0;
+            for (let key of Object.keys(counts)) {
+                if (counts[key] > max) {
+                    max = counts[key];
+                }
+            }
+
+            const radiusScale = d3
+                .scaleLinear()
+                .domain([0, max])
+                .range([0, 20]);
+            radius = (d: any) =>
+                radiusScale(counts[`(${getCircleX(d)},${getCircleY(d)})`]);
+        }
+
+        //screate axis
+        const XAxis = d3.axisBottom<any>(XScale);
+        const YAxis = d3.axisLeft<any>(YScale);
 
         const svg = d3
             .select(ref.current)
@@ -61,9 +120,9 @@ export default function ScatterPlot({
             .selectAll("circle")
             .data(data)
             .join("circle")
-            .attr("cx", (d) => XScale(xValue(d)))
-            .attr("cy", (d) => YScale(yValue(d)))
-            .attr("r", 1.5)
+            .attr("cx", (d) => getCircleX(d) ?? 0)
+            .attr("cy", (d) => getCircleY(d) ?? 0)
+            .attr("r", (d) => radius(d) ?? 1.5)
             .attr("fill", "#69b3a2");
 
         svg.append("text")
