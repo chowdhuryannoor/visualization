@@ -16,7 +16,15 @@ function App() {
 
     //Load the data when the app starts
     useEffect(() => {
-        d3.csv("../data/Carbon Emission.csv").then(setData);
+        d3.csv("../data/Carbon Emission.csv").then((d) => {
+            d.map((d) => {
+                if (d["Vehicle_Type"] == "") {
+                    d["Vehicle_Type"] = "None";
+                }
+                return d;
+            });
+            setData(d);
+        });
     }, []);
 
     //Event Handlers to set state
