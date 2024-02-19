@@ -112,9 +112,20 @@ export default function ScatterPlot({
             .attr("transform", `translate(0,${height - margin.bottom})`)
             .call(XAxis);
 
-        svg.append("g")
+        if(scat_y.type == chart.barchart){
+            svg.append("g")
+            .attr("transform", `translate(${margin.left}, 0)`)
+            .call(YAxis)
+            .selectAll("text")
+            .attr("transform", "rotate(-90)")
+            .attr("x", 20)
+            .attr("y", -20)
+            .style("text-anchor", "end");
+        }else {
+            svg.append("g")
             .attr("transform", `translate(${margin.left}, 0)`)
             .call(YAxis);
+        }
 
         svg.append("g")
             .selectAll("circle")
