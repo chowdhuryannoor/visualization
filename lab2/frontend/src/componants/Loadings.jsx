@@ -53,7 +53,7 @@ export default function Loadings(props) {
                 <thead>
                     <tr>
                         {column.map((c, i) => (
-                            <th key={i}>{c}</th>
+                            <th key={i} style={{ fontSize: "12px"}}>{c}</th>
                         ))}
                     </tr>
                 </thead>
